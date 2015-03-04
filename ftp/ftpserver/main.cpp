@@ -11,8 +11,8 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
-#include "ftpserverfunctions.h"
-
+#include <cstdlib>
+#include <cstring>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -22,6 +22,9 @@
 #include <signal.h>
 #include <errno.h>
 #include <unistd.h>
+#include <stdio.h>
+#include <string>
+
 
 #define STARTPORT 5000  	// port # to start looking for open port
 #define MAXPORT 65000 		//  maximum port number to search
@@ -32,6 +35,15 @@
 void sigchld_handler(int s)
 {
 	while(waitpid(-1, NULL, WNOHANG) > 0);
+}
+
+void *get_in_addr(struct sockaddr *sa)
+{
+	if (sa->sa_family == AF_INET) {
+		return &(((struct sockaddr_in*)sa)->sin_addr);
+	}
+
+	return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
 
@@ -137,17 +149,24 @@ int main(int argc, char* argv[])
 			
 			while(1)
 			{
+				memset(buffer,'\0',sizeof(buffer));
 				bytesToReceive = recv(new_fd, buffer, 128, 0);
-				if(bytesToReceive < 0){
+				if(bytesToReceive < 0)
+				{
 					perror("recv");
 					close(new_fd);
 					exit(1);
+				}else if(bytesToReceive == 0 || strncmp(buffer, "bye", 3) == 0)
+				{
+					printf("Client (%s) has been disconnected\n", (char *)inet_ntoa(their_addr.sin_addr));
+					close(new_fd);
+					exit(0);
 				}
 				printf("Received:  %s\n", buffer);
 			}
 		}
-		//close(new_fd);  // parent doesn't need this
+		close(new_fd);  // parent doesn't need this
 	}
-	
+	close(new_fd);
 	return EXIT_SUCCESS;
 }

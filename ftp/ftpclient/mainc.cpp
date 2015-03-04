@@ -22,8 +22,11 @@
 #include <signal.h>
 #include <errno.h>
 #include <unistd.h>
+#include "ftpclientfunctions.h"
 
 #define MAXDATASIZE 100
+
+using std::string;
 
 int main(int argc, char* argv[])
 {
@@ -64,6 +67,7 @@ int main(int argc, char* argv[])
 		{
 			close(sockfd);
 			perror("client: connect");
+			exit(1);
 			continue;
 		}
 
@@ -77,25 +81,85 @@ int main(int argc, char* argv[])
 	
 	int len = 0;
 	char buffer[MAXDATASIZE];
+	string input;
 		
 	while(1) 
 	{  
 		
-		getline(buffer);
-		len = strlen(buffer);
-		//buffer[len] = '\0';
-		printf("Sending %s (Total %d bytes)\n",buffer,len);
+		gets(buffer);
+		//len = strlen(buffer);
 		
-		//buffer[bytesToSend]='\0';
-		if((len=send(sockfd, buffer, len, 0)) == -1)
+		//extract the actual command
+		char *space, command[100], arguement[100];
+		space = strtok(buffer, " ");
+		strncpy(command,space, sizeof(command));
+		len = strlen(command);
+		command[len] ='\0';
+		
+		//extract the arguements
+		if(space !=NULL)
 		{
-			perror("send");
-			close(sockfd);
-			exit(1);
+			space = strtok(NULL, " ");
+			strncpy(arguement,space, sizeof(arguement));
+			arguement[strlen(arguement)]='\0';
 		}
 		
+		bool serverCommand = ((strncmp(command, "ls", 2) == 0) ||
+							(strncmp(command, "pwd", 3) == 0) ||
+							(strncmp(command, "cd", 2) == 0) ||
+							(strncmp(command, "get", 3) == 0));
 		
+		bool clientCommand = ((strncmp(command, "help", 4) == 0) ||
+							(strncmp(command, "lls", 3) == 0) ||
+							(strncmp(command, "lpwd", 4) == 0) ||
+							(strncmp(command, "lcd", 3) == 0));
+		
+		//process the entered command
+		if (len == 0 || strncmp(command, "bye", 3) == 0)
+		{
+			printf("\nGoodbye\n\n");
+			break;
+		}//send server commands to the server
+		else if(serverCommand)
+		{
+			printf("Server command: %s (%d)\n", command, len);
+			if((len=send(sockfd, command, len, 0)) == -1)
+			{
+				perror("send");
+				close(sockfd);
+				exit(1);
+			}
+		}//process client commands locally
+		else if(clientCommand)
+		{
+			if(strncmp(command, "help", 4) == 0)
+			{
+				PrintHelp();
+			}
+			else if(strncmp(command, "lls", 3) == 0)
+			{
+				system("ls");
+			}
+			else if(strncmp(command, "lpwd", 4) == 0)
+			{
+				system("pwd");
+			}
+			else if(strncmp(command, "lcd", 4) == 0)
+			{
+				system(strcat("cd ", arguement));
+			}
+			printf("Client command: %s (%d)\n", command, len);
+		}//command not recognized
+		else
+		{
+			std::cout << "Invalid command.  Type 'help' for a list of valid commands." << std::endl;
+		}
+		
+				
 	}
+	close(sockfd);
 	
 	return EXIT_SUCCESS;
+	
+	
 }
