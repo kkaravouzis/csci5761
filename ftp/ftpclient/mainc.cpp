@@ -80,75 +80,109 @@ int main(int argc, char* argv[])
 	freeaddrinfo(serverinfo); // all done with this structure
 	
 	int len = 0;
+	int bytesToReceive;
+	char userInput[MAXDATASIZE];
 	char buffer[MAXDATASIZE];
+	char *space, command[MAXDATASIZE], arguement[MAXDATASIZE];
 	string input;
+	
+	//zero out buffers
+	memset(userInput, '\0', sizeof userInput);
+	memset(buffer, '\0', sizeof buffer);
+	memset(command, '\0', sizeof command);
+	memset(arguement, '\0', sizeof arguement);
 		
 	while(1) 
 	{  
+		//get input from user
+		std::cout << "ftpclient>";
+		gets(userInput);
+		userInput[strlen(userInput)] = '\0';
+		strcpy(buffer, userInput);
+		buffer[strlen(userInput)] = '\0';
 		
-		gets(buffer);
-		//len = strlen(buffer);
 		
 		//extract the actual command
-		char *space, command[100], arguement[100];
-		space = strtok(buffer, " ");
+		space = strtok(userInput, " ");
 		strncpy(command,space, sizeof(command));
 		len = strlen(command);
-		command[len] ='\0';
+		command[strlen(command)] ='\0';
 		
 		//extract the arguements
 		if(space !=NULL)
 		{
 			space = strtok(NULL, " ");
-			strncpy(arguement,space, sizeof(arguement));
-			arguement[strlen(arguement)]='\0';
+			if(space !=NULL)
+			{
+				strncpy(arguement,space, sizeof(arguement));
+				arguement[strlen(arguement)]='\0';
+			}
 		}
-		
-		bool serverCommand = ((strncmp(command, "ls", 2) == 0) ||
-							(strncmp(command, "pwd", 3) == 0) ||
-							(strncmp(command, "cd", 2) == 0) ||
-							(strncmp(command, "get", 3) == 0));
-		
-		bool clientCommand = ((strncmp(command, "help", 4) == 0) ||
-							(strncmp(command, "lls", 3) == 0) ||
-							(strncmp(command, "lpwd", 4) == 0) ||
-							(strncmp(command, "lcd", 3) == 0));
+	
 		
 		//process the entered command
 		if (len == 0 || strncmp(command, "bye", 3) == 0)
 		{
-			printf("\nGoodbye\n\n");
+			printf("\nGoodbye!\n\n");
 			break;
-		}//send server commands to the server
-		else if(serverCommand)
+		}//send SERVER COMMANDS to the server
+		else if(isServerCommand(command))
 		{
-			printf("Server command: %s (%d)\n", command, len);
-			if((len=send(sockfd, command, len, 0)) == -1)
+			if((len=send(sockfd, buffer, sizeof(buffer), 0)) == -1)
 			{
 				perror("send");
 				close(sockfd);
 				exit(1);
 			}
-		}//process client commands locally
-		else if(clientCommand)
+			
+			memset(buffer,'\0',sizeof(buffer));
+			
+			if(strncmp(command, "ls", 2) == 0) 	//LS COMMAND
+			{
+				bytesToReceive = recv(sockfd, buffer, 1000, 0);
+				puts(buffer);
+			}
+			else if(strncmp(command, "pwd", 3) == 0)	//PWD COMMAND
+			{				
+				bytesToReceive = recv(sockfd, buffer, 1000, 0);
+				puts(buffer);
+			}
+			else if(strncmp(command, "cd", 2) == 0)	//CD COMMAND
+			{
+				if(strlen(arguement) > 1)
+				{
+					bytesToReceive = recv(sockfd, buffer, 1000, 0);
+					puts(buffer);
+				}
+			}
+			else if(strncmp(command, "get", 3) == 0)	//GET COMMAND
+			{
+				
+			}			
+			
+		}//process CLIENT COMMANDS locally
+		else if(isClientCommand(command))
 		{
-			if(strncmp(command, "help", 4) == 0)
+			if(strncmp(command, "help", 4) == 0)		//HELP COMMAND
 			{
 				PrintHelp();
 			}
-			else if(strncmp(command, "lls", 3) == 0)
+			else if(strncmp(command, "lls", 3) == 0)	//LLS COMMAND
 			{
 				system("ls");
 			}
-			else if(strncmp(command, "lpwd", 4) == 0)
+			else if(strncmp(command, "lpwd", 4) == 0)	//LPWD COMMAND
 			{
-				system("pwd");
+				puts(getwd(buffer));
 			}
-			else if(strncmp(command, "lcd", 4) == 0)
+			else if(strncmp(command, "lcd", 3) == 0)	//LCD COMMAND
 			{
-				system(strcat("cd ", arguement));
+				if((strlen(arguement) > 1) && strncmp(arguement, " ", 1) != 0)
+				{
+					if(chdir(arguement) == 0) system("pwd");
+					else printf("%s is not a valid directory.\n", arguement);
+				}
 			}
-			printf("Client command: %s (%d)\n", command, len);
 		}//command not recognized
 		else
 		{

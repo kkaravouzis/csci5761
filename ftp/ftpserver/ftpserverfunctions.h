@@ -25,3 +25,7 @@ int GetSocket();
 int BindSocket(int socketfd, sockaddr_in *serverAddress);
 
 void *get_in_addr(struct sockaddr *sa);
+
+void sigchld_handler(int s);
+
+char *GetDirListing(char*);

@@ -15,3 +15,9 @@ using std::string;
 
 
 void PrintHelp();
+
+bool isServerCommand(char *c);
+
+bool isClientCommand(char *c);
+
+char *GetDirListing(char *path);

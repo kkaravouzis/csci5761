@@ -7,12 +7,16 @@
 #include <stdio.h>
 #include <errno.h>
 #include <cstdlib>
+#include <cstring>
 #include <string>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/wait.h>
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <dirent.h>
+#include <iostream>
 
 using std::string;
 
@@ -55,4 +59,34 @@ void *get_in_addr(struct sockaddr *sa)
 
 	return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
+
+
+char *GetDirListing(char *path)
+{
 	
+	char *results;
+	DIR *dir;
+	struct dirent *DirEntry;
+	dir = opendir(path);
+	string listing = "";
+	
+	while(DirEntry=readdir(dir))
+	{
+		if (DirEntry->d_name[0] != '.')
+		{
+			listing = listing + DirEntry->d_name + "\t";
+		}
+				
+	}
+	closedir(dir);
+	
+	results = new char[listing.length()+1];
+	strcpy(results, listing.c_str());
+	return results;
+}
+
+
+void sigchld_handler(int s)
+{
+	while(waitpid(-1, NULL, WNOHANG) > 0);
+}
