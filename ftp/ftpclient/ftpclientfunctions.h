@@ -21,3 +21,5 @@ bool isServerCommand(char *c);
 bool isClientCommand(char *c);
 
 char *GetDirListing(char *path);
+
+bool FileExists(char *f);

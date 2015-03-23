@@ -7,6 +7,7 @@
 #include <iostream>
 #include <cstring>
 #include <dirent.h>
+#include <fstream>
 
 
 using std::string;
@@ -25,6 +26,12 @@ void PrintHelp()
 				"lpwd\t- Show the current directory on the local computer\n"
 				"pwd\t- Show the current directory on the remote server\n"
 			<< std::endl;
+}
+
+bool FileExists(char *f)
+{
+	std::ifstream fileStream(f);
+	return fileStream;
 }
 
 
