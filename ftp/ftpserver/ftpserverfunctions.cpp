@@ -17,6 +17,7 @@
 #include <netinet/in.h>
 #include <dirent.h>
 #include <iostream>
+#include <fstream>
 
 using std::string;
 
@@ -58,6 +59,27 @@ void *get_in_addr(struct sockaddr *sa)
 	}
 
 	return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
+
+long FileSize(char *f)
+{
+	FILE *file;
+	long size;
+
+	file = fopen (f,"rb");
+	
+	fseek (file, 0, SEEK_END);
+	size=ftell (file);
+	fclose (file);
+	
+	return size;
+	
+}
+
+bool FileExists(char *f)
+{
+	std::ifstream fileStream(f);
+	return fileStream;
 }
 
 

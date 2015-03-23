@@ -29,3 +29,7 @@ void *get_in_addr(struct sockaddr *sa);
 void sigchld_handler(int s);
 
 char *GetDirListing(char*);
+
+long FileSize(char*);
+
+bool FileExists(char*);
