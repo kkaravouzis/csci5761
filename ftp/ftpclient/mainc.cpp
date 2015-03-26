@@ -44,15 +44,15 @@ int main(int argc, char* argv[])
 	
 	
 	//build the server address structure
-	bzero(&serverAddr, sizeof(serverAddr));		//zero out structure
-	serverPort = atoi(argv[2]);					//convert char string to integer
-	serverAddr.sin_family = AF_INET;				//IPV4
-	serverAddr.sin_port = htons(serverPort);		//add server's port #
+	bzero(&serverAddr, sizeof(serverAddr));				//zero out structure
+	serverPort = atoi(argv[2]);						//convert char string to integer
+	serverAddr.sin_family = AF_INET;					//IPV4
+	serverAddr.sin_port = htons(serverPort);				//add server's port #
 	
 	//resolve hostname of server
-	bzero(&hints, sizeof(hints));					//zero out struct
+	bzero(&hints, sizeof(hints));						//zero out struct
 	hints.ai_family = AF_INET;						//IPV4
-	hints.ai_socktype = SOCK_STREAM;			//TCP, reliable stream socket
+	hints.ai_socktype = SOCK_STREAM;					//TCP, reliable stream socket
 	
 	serverName = argv[1];
 	if((aInfo = getaddrinfo(serverName, argv[2], &hints, &serverinfo)) !=0)
