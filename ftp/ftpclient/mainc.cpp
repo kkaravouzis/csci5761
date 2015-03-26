@@ -57,8 +57,8 @@ int main(int argc, char* argv[])
 	serverName = argv[1];
 	if((aInfo = getaddrinfo(serverName, argv[2], &hints, &serverinfo)) !=0)
 	{
-		//fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(aInfo));
-		perror("client: get address by name");
+		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(aInfo));
+		//perror("client: get address by name");
 		exit(1);
 	}
 	
