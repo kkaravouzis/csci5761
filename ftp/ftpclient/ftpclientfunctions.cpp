@@ -10,6 +10,7 @@
 #include <fstream>
 
 
+
 using std::string;
 
 
@@ -75,4 +76,38 @@ char *GetDirListing(char *path)
 	results = new char[listing.length()+1];
 	strcpy(results, listing.c_str());
 	return results;
+}
+
+bool PathExists(char *path)
+{
+	DIR *dir = opendir(path);
+	
+	if(dir)
+	{
+		closedir(dir);
+		return true;		
+	}
+	else
+		return false;
+	
+}
+
+void PrintLS(char *buf)
+{
+	//int width=0;
+	//int count = 0;
+	char *delim = strtok(buf, "\t");
+	
+	
+	while(delim)
+	{
+		//count++;
+		printf("\t%s\n", delim);
+		delim = strtok(NULL, "\t");
+		//~ if(delim != NULL)
+		//~ {
+			//~ if(strlen(delim) > width)
+				//~ width = strlen(delim);
+		//~ }
+	}
 }

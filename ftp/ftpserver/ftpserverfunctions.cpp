@@ -40,26 +40,6 @@ string ResolveHostname(char *aHost)
 	
 }
 
-int GetSocket()
-{
-	int socketfd;
-	if((socketfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-	{
-		return -1;
-	}
-	
-	return socketfd;
-	
-}
-
-void *get_in_addr(struct sockaddr *sa)
-{
-	if (sa->sa_family == AF_INET) {
-		return &(((struct sockaddr_in*)sa)->sin_addr);
-	}
-
-	return &(((struct sockaddr_in6*)sa)->sin6_addr);
-}
 
 long FileSize(char *f)
 {
@@ -80,6 +60,20 @@ bool FileExists(char *f)
 {
 	std::ifstream fileStream(f);
 	return fileStream;
+}
+
+bool PathExists(char *path)
+{
+	DIR *dir = opendir(path);
+	
+	if(dir)
+	{
+		closedir(dir);
+		return true;		
+	}
+	else
+		return false;
+	
 }
 
 
@@ -108,7 +102,20 @@ char *GetDirListing(char *path)
 }
 
 
-void sigchld_handler(int s)
+void sigchld_handler(pid_t s)
 {
 	while(waitpid(-1, NULL, WNOHANG) > 0);
 }
+
+int GetSocket()
+{
+	int socketfd;
+	if((socketfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	{
+		return -1;
+	}
+	
+	return socketfd;
+	
+}
+

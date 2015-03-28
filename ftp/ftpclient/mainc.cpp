@@ -164,12 +164,13 @@ int main(int argc, char* argv[])
 				{
 					bzero(buffer, MAXDATA);
 					bytesToReceive = recv(sockfd, buffer, MAXDATA, 0);
-					printf("%s\n", buffer);
+					
+					PrintLS(buffer);//printf("%s\n", buffer);
 				
 					if(bytesToReceive == 512)
 					{
 						bytesToReceive = recv(sockfd, buffer, MAXDATA, 0);
-						printf("%s\n", buffer);
+						PrintLS(buffer);//printf("%s\n", buffer);
 					}
 					else break;
 				}
@@ -202,7 +203,7 @@ int main(int argc, char* argv[])
 				if(strlen(arg) > 1)
 				{
 					bytesToReceive = recv(sockfd, buffer, MAXDATA, 0);
-					printf("Current remote directory:  %s\n", buffer);
+					puts(buffer);
 				}
 			}
 			else if(strncmp(command, "get", 3) == 0)									//GET COMMAND
@@ -269,7 +270,19 @@ int main(int argc, char* argv[])
 			}
 			else if(strncmp(command, "lls", 3) == 0)									//LLS COMMAND
 			{
-				system("ls");
+				
+				if(strlen(arg) > 1)
+				{
+					if(PathExists(arg))
+						PrintLS(GetDirListing(arg));
+					else
+						printf("%s is not a valid directory.\n", arg); 
+				}
+				else
+				{
+					ptrDir= getcwd(currentDir,sizeof(currentDir));
+					PrintLS(GetDirListing(currentDir));
+				}
 			}
 			else if(strncmp(command, "lpwd", 4) == 0)								//LPWD COMMAND
 			{
@@ -283,7 +296,7 @@ int main(int argc, char* argv[])
 					if(chdir(arg) == 0)
 					{
 						ptrDir= getcwd(currentDir,sizeof(currentDir));
-						printf("Current remote directory:  %s\n", currentDir);
+						printf("Current local directory:  %s\n", currentDir);
 					}
 					else 
 						printf("%s is not a valid directory.\n", arg);

@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
 		}
 		
 		//get client information
-		inet_ntop(clientAddr.sin_family, get_in_addr((struct sockaddr *)&clientAddr),host, sizeof(host));
+		inet_ntop(clientAddr.sin_family,&clientAddr.sin_addr,host, sizeof(host));
 		printf("server:  connection from host %s\n", host);
 		
 		//create a child process for the new connection
@@ -165,7 +165,7 @@ int main(int argc, char* argv[])
 					close(new_fd);
 					exit(0);
 				}
-				else if(strncmp(buffer, "pwd", 3) == 0)						//PWD COMMAND
+				else if(strncmp(buffer, "pwd", 3) == 0)							//PWD COMMAND
 				{
 					ptrDir= getcwd(currentDir,sizeof(currentDir));
 					if((len=send(new_fd, ptrDir, strlen(ptrDir), 0)) == -1)
@@ -179,8 +179,16 @@ int main(int argc, char* argv[])
 				{	
 					if(strlen(arg) > 1)
 					{
-						result = (char *)malloc(sizeof(GetDirListing(arg)));
-						result = GetDirListing(arg);
+						if(PathExists(arg))
+						{
+							result = (char *)malloc(sizeof(GetDirListing(arg)));
+							result = GetDirListing(arg);
+						}
+						else
+						{
+							result = (char *)malloc(64);
+							result = strcat(arg, " is not a valid directory.");
+						}
 					}
 					else
 					{
@@ -195,8 +203,6 @@ int main(int argc, char* argv[])
 						exit(1);
 					}
 					
-					//free memory
-					free(result);
 					
 				}
 				else if(strncmp(buffer, "cd", 2) == 0)							//CD COMMAND
@@ -205,16 +211,15 @@ int main(int argc, char* argv[])
 					{
 						if(chdir(arg) == 0) 
 						{
+							char str[] = "Current remote directory:  ";
 							ptrDir = getcwd(currentDir,sizeof(currentDir));
-							result = (char *)malloc(sizeof(currentDir));
-							result = currentDir;
-							//result = (char *)malloc(sizeof(getwd(currentDir)));
-							//result = getwd(currentDir);
+							result = (char *)malloc(sizeof(currentDir)+64);
+							result =strcat(str,currentDir);
 						}
 						else
 						{
 							result = (char *)calloc(128, sizeof(char));
-							result = strcat(arg, " is not a valid directory.\n");
+							result = strcat(arg, " is not a valid directory.");
 						}	
 						
 						if((len=send(new_fd, result, strlen(result), 0)) < 0)
@@ -272,6 +277,7 @@ int main(int argc, char* argv[])
 						}
 					}
 				}
+				
 			}
 			close(new_fd);
 		}
