@@ -6,6 +6,6 @@ ftpserver:  The ftpserver program will select an open TCP port to listen on begi
     Example:  ./ftpserver
 
 ftpclient:  The ftpclient program will make a TCP connection to the ftpserver in order to download text files.  The ftpclient program supports local commands lls, lcd, lpwd, and help.  It also sends commands pwd, ls, cd, get, bye, and exit to the server.
-The makefile will compile and link the source files mainc.cpp and ftpclientfunctions.cpp.  The target executable is 'ftpclient'.  ftpclient takes two arguements.  The first arguement is the hostname of the server on which ftpserver is running.  The second arguement is the port number on which the ftpserver is running.
+The makefile will compile and link the source files mainc.cpp and ftpclientfunctions.cpp.  The target executable is 'ftpclient'.  ftpclient takes two arguements.  The first arguement is the hostname of the server on which ftpserver is running.  The second arguement is the port number on which the ftpserver is listening.
     Example:  ./ftpclient example.com 5000
     
